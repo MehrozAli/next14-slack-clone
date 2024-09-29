@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 
-import { mutation, query, QueryCtx } from "./_generated/server";
+import { mutation, MutationCtx, query, QueryCtx } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 import {
   canReadMessage,
@@ -10,6 +10,31 @@ import {
   isParticipant,
   requireUserId,
 } from "./access";
+import { imageProblem } from "./limits";
+
+// Removes messages together with their reactions and attached images, so
+// deleting a message never leaves orphaned rows or files behind.
+export const deleteMessages = async (
+  ctx: MutationCtx,
+  messages: Doc<"messages">[]
+) => {
+  for (const message of messages) {
+    const reactions = await ctx.db
+      .query("reactions")
+      .withIndex("by_message_id", (q) => q.eq("messageId", message._id))
+      .collect();
+
+    for (const reaction of reactions) {
+      await ctx.db.delete(reaction._id);
+    }
+
+    if (message.image) {
+      await ctx.storage.delete(message.image);
+    }
+
+    await ctx.db.delete(message._id);
+  }
+};
 
 const populateUser = (ctx: QueryCtx, userId: Id<"users">) => ctx.db.get(userId);
 const populateMember = (ctx: QueryCtx, memberId: Id<"members">) =>
@@ -260,6 +285,20 @@ export const create = mutation({
       }
     }
 
+    if (args.image) {
+      const file = await ctx.db.system.get(args.image);
+
+      if (!file) {
+        throw new Error("Image not found");
+      }
+
+      const problem = imageProblem(file);
+
+      if (problem) {
+        throw new Error(problem);
+      }
+    }
+
     const messageId = await ctx.db.insert("messages", {
       memberId: member._id,
       body: args.body,
@@ -322,7 +361,7 @@ export const remove = mutation({
       throw new Error("Unauthorized");
     }
 
-    await ctx.db.delete(args.id);
+    await deleteMessages(ctx, [message]);
     return args.id;
   },
 });

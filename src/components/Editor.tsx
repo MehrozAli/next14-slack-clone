@@ -10,8 +10,11 @@ import { PiTextAa } from "react-icons/pi";
 import { MdSend } from "react-icons/md";
 import Image from "next/image";
 import { ImageIcon, Smile, XIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
+
+import { IMAGE_TYPES, imageProblem } from "../../convex/limits";
 
 import { EmojiPopover } from "./EmojiPopover";
 import { Button } from "./ui/button";
@@ -158,9 +161,23 @@ const Editor = ({
     <div className="flex flex-col">
       <input
         type="file"
-        accept="image/*"
+        accept={IMAGE_TYPES.join(",")}
         ref={imageRef}
-        onChange={(event) => setImage(event.target.files![0])}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+
+          if (!file) return;
+
+          const problem = imageProblem({ contentType: file.type, size: file.size });
+
+          if (problem) {
+            toast.error(problem);
+            event.target.value = "";
+            return;
+          }
+
+          setImage(file);
+        }}
         className="hidden"
       />
 

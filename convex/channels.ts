@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation, query } from "./_generated/server";
+import { deleteMessages } from "./messages";
 
 export const get = query({
   args: { workspaceId: v.id("workspaces") },
@@ -153,16 +154,12 @@ export const remove = mutation({
       throw new Error("Unauthorized");
     }
 
-    const [channelMessages] = await Promise.all([
-      ctx.db
-        .query("messages")
-        .withIndex("by_channel_id", (q) => q.eq("channelId", args.id))
-        .collect(),
-    ]);
+    const channelMessages = await ctx.db
+      .query("messages")
+      .withIndex("by_channel_id", (q) => q.eq("channelId", args.id))
+      .collect();
 
-    for (const message of channelMessages) {
-      await ctx.db.delete(message._id);
-    }
+    await deleteMessages(ctx, channelMessages);
 
     await ctx.db.delete(args.id);
 

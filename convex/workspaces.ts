@@ -193,6 +193,9 @@ export const remove = mutation({
     }
 
     for (const message of messages) {
+      if (message.image) {
+        await ctx.storage.delete(message.image);
+      }
       await ctx.db.delete(message._id);
     }
 

@@ -3,6 +3,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { deleteMessages } from "./messages";
 
 const populateUser = (ctx: QueryCtx, id: Id<"users">) => {
   return ctx.db.get(id);
@@ -200,13 +201,11 @@ export const remove = mutation({
         .collect(),
     ]);
 
-    for (const message of messages) {
-      await ctx.db.delete(message._id);
-    }
-
     for (const reaction of reactions) {
       await ctx.db.delete(reaction._id);
     }
+
+    await deleteMessages(ctx, messages);
 
     for (const conversation of conversations) {
       await ctx.db.delete(conversation._id);
