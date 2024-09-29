@@ -46,6 +46,27 @@ const populateReactions = (ctx: QueryCtx, messageId: Id<"messages">) =>
     .withIndex("by_message_id", (q) => q.eq("messageId", messageId))
     .collect();
 
+// One entry per emoji: who reacted and how many, keyed on the first reaction.
+const summariseReactions = (reactions: Doc<"reactions">[]) => {
+  const byValue = new Map<
+    string,
+    Omit<Doc<"reactions">, "memberId"> & { count: number; memberIds: Id<"members">[] }
+  >();
+
+  for (const { memberId, ...reaction } of reactions) {
+    const entry = byValue.get(reaction.value);
+
+    if (entry) {
+      if (!entry.memberIds.includes(memberId)) entry.memberIds.push(memberId);
+      entry.count = entry.memberIds.length;
+    } else {
+      byValue.set(reaction.value, { ...reaction, count: 1, memberIds: [memberId] });
+    }
+  }
+
+  return [...byValue.values()];
+};
+
 const populateThread = async (ctx: QueryCtx, messageId: Id<"messages">) => {
   const messages = await ctx.db
     .query("messages")
@@ -171,45 +192,13 @@ export const get = query({
             const image = message.image
               ? await ctx.storage.getUrl(message.image)
               : undefined;
-            const reactionsWithCounts = reactions.map((reaction) => {
-              return {
-                ...reaction,
-                count: reactions.filter((r) => r.value === reaction.value)
-                  .length,
-              };
-            });
-            const dedupedReactions = reactionsWithCounts.reduce(
-              (acc, reaction) => {
-                const existingReaction = acc.find(
-                  (r) => r.value === reaction.value
-                );
-
-                if (existingReaction) {
-                  existingReaction.memberIds = Array.from(
-                    new Set([...existingReaction.memberIds, reaction.memberId])
-                  );
-                } else {
-                  acc.push({ ...reaction, memberIds: [reaction.memberId] });
-                }
-
-                return acc;
-              },
-              [] as (Doc<"reactions"> & {
-                count: number;
-                memberIds: Id<"members">[];
-              })[]
-            );
-
-            const reactionsWithoutMemberId = dedupedReactions.map(
-              ({ memberId, ...rest }) => rest
-            );
 
             return {
               ...message,
               image,
               member,
               user,
-              reactions: reactionsWithoutMemberId,
+              reactions: summariseReactions(reactions),
               threadCount: thread.count,
               threadImage: thread.image,
               threadName: thread.name,
@@ -403,34 +392,6 @@ export const getById = query({
     }
 
     const reactions = await populateReactions(ctx, message._id);
-    const reactionsWithCounts = reactions.map((reaction) => {
-      return {
-        ...reaction,
-        count: reactions.filter((r) => r.value === reaction.value).length,
-      };
-    });
-    const dedupedReactions = reactionsWithCounts.reduce(
-      (acc, reaction) => {
-        const existingReaction = acc.find((r) => r.value === reaction.value);
-
-        if (existingReaction) {
-          existingReaction.memberIds = Array.from(
-            new Set([...existingReaction.memberIds, reaction.memberId])
-          );
-        } else {
-          acc.push({ ...reaction, memberIds: [reaction.memberId] });
-        }
-
-        return acc;
-      },
-      [] as (Doc<"reactions"> & {
-        count: number;
-        memberIds: Id<"members">[];
-      })[]
-    );
-    const reactionsWithoutMemberId = dedupedReactions.map(
-      ({ memberId, ...rest }) => rest
-    );
 
     return {
       ...message,
@@ -439,7 +400,7 @@ export const getById = query({
         : undefined,
       user,
       member,
-      reactions: reactionsWithoutMemberId,
+      reactions: summariseReactions(reactions),
     };
   },
 });
