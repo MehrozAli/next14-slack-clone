@@ -4,6 +4,9 @@ interface ThumbnailProps {
   url: string | null | undefined;
 }
 
+// Convex storage URLs point at the deployment's own host, so plain <img>
+// avoids routing every attachment through the Next image optimiser.
+/* eslint-disable @next/next/no-img-element */
 export const Thumbnail = ({ url }: ThumbnailProps) => {
   if (!url) {
     return null;
