@@ -17,7 +17,13 @@ export const createOrGet = mutation({
       .unique();
     const otherMember = await ctx.db.get(args.memberId);
 
-    if (!currentMember || !otherMember) throw new Error("Member not found.");
+    if (
+      !currentMember ||
+      !otherMember ||
+      otherMember.workspaceId !== args.workspaceId
+    ) {
+      throw new Error("Member not found.");
+    }
 
     const existingConversation = await ctx.db
       .query("conversations")

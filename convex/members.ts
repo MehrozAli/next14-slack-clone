@@ -95,7 +95,8 @@ export const getById = query({
       .query("members")
       .withIndex("by_workspace_user_id", (q) =>
         q.eq("workspaceId", member.workspaceId).eq("userId", userId)
-      );
+      )
+      .unique();
 
     if (!currentMember) return null;
 
@@ -136,6 +137,10 @@ export const update = mutation({
       throw new Error("Unauthorized");
     }
 
+    if (currentMember._id === args.id) {
+      throw new Error("Admins can't change their own role");
+    }
+
     await ctx.db.patch(args.id, { role: args.role });
     return args.id;
   },
@@ -165,7 +170,9 @@ export const remove = mutation({
       )
       .unique();
 
-    if (!currentMember) {
+    const isSelf = currentMember?._id === args.id;
+
+    if (!currentMember || (!isSelf && currentMember.role !== "admin")) {
       throw new Error("Unauthorized");
     }
 
@@ -173,11 +180,6 @@ export const remove = mutation({
       throw new Error("Admin can't be removed");
     }
 
-    if (currentMember._id === args.id && currentMember.role === "admin") {
-      throw new Error("Can't remove self if an admin");
-    }
-
-    // * Delete all related messages & reactions
     const [messages, reactions, conversations] = await Promise.all([
       ctx.db
         .query("messages")

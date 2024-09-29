@@ -1,22 +1,15 @@
-import { convexToJson, v } from "convex/values";
+import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
-
-export const getMember = async (
-  ctx: QueryCtx,
-  workspaceId: Id<"workspaces">,
-  userId: Id<"users">
-) => {
-  return ctx.db
-    .query("members")
-    .withIndex("by_workspace_user_id", (q) =>
-      q.eq("workspaceId", workspaceId).eq("userId", userId)
-    )
-    .unique();
-};
+import {
+  canReadMessage,
+  getMember,
+  isParticipant,
+  requireUserId,
+} from "./access";
 
 const populateUser = (ctx: QueryCtx, userId: Id<"users">) => ctx.db.get(userId);
 const populateMember = (ctx: QueryCtx, memberId: Id<"members">) =>
@@ -75,22 +68,54 @@ export const get = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
+    const userId = await requireUserId(ctx);
 
     let _conversationId = args.conversationId;
+    let workspaceId: Id<"workspaces">;
 
-    if (!args.conversationId && !args.channelId && args.parentMessageId) {
+    if (args.parentMessageId) {
       const parentMessage = await ctx.db.get(args.parentMessageId);
 
       if (!parentMessage) {
         throw new Error("Parent message not found");
       }
 
-      _conversationId = parentMessage.conversationId;
+      const member = await getMember(ctx, parentMessage.workspaceId, userId);
+
+      if (!(await canReadMessage(ctx, parentMessage, member))) {
+        throw new Error("Unauthorized");
+      }
+
+      if (!args.conversationId && !args.channelId) {
+        _conversationId = parentMessage.conversationId;
+      }
+      workspaceId = parentMessage.workspaceId;
+    } else if (args.channelId) {
+      const channel = await ctx.db.get(args.channelId);
+
+      if (!channel) {
+        throw new Error("Channel not found");
+      }
+      workspaceId = channel.workspaceId;
+    } else if (args.conversationId) {
+      const conversation = await ctx.db.get(args.conversationId);
+
+      if (!conversation) {
+        throw new Error("Conversation not found");
+      }
+
+      const member = await getMember(ctx, conversation.workspaceId, userId);
+
+      if (!member || !isParticipant(conversation, member)) {
+        throw new Error("Unauthorized");
+      }
+      workspaceId = conversation.workspaceId;
+    } else {
+      throw new Error("A channel, conversation or parent message is required");
+    }
+
+    if (!(await getMember(ctx, workspaceId, userId))) {
+      throw new Error("Unauthorized");
     }
 
     const results = await ctx.db
@@ -184,29 +209,55 @@ export const create = mutation({
     conversationId: v.optional(v.id("conversations")),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
+    const userId = await requireUserId(ctx);
     const member = await getMember(ctx, args.workspaceId, userId);
 
     if (!member) {
       throw new Error("Unauthorized");
     }
 
+    if (!args.channelId && !args.conversationId && !args.parentMessageId) {
+      throw new Error("A channel, conversation or parent message is required");
+    }
+
+    if (args.channelId) {
+      const channel = await ctx.db.get(args.channelId);
+
+      if (!channel || channel.workspaceId !== args.workspaceId) {
+        throw new Error("Channel not found");
+      }
+    }
+
     let _conversationId = args.conversationId;
 
-    // Corner case: when replying in a thread in a one-to-one convo, we need to find the conversationId ourselves
-    if (!args.conversationId && !args.channelId && args.parentMessageId) {
+    if (args.parentMessageId) {
       const parentMessage = await ctx.db.get(args.parentMessageId);
 
-      if (!parentMessage) {
+      if (
+        !parentMessage ||
+        !(await canReadMessage(ctx, parentMessage, member)) ||
+        (args.channelId && parentMessage.channelId !== args.channelId)
+      ) {
         throw new Error("Parent message not found");
       }
 
-      _conversationId = parentMessage.conversationId;
+      // Thread replies inside a direct message only carry the parent id,
+      // so the conversation is taken from the parent.
+      if (!args.conversationId && !args.channelId) {
+        _conversationId = parentMessage.conversationId;
+      }
+    }
+
+    if (_conversationId) {
+      const conversation = await ctx.db.get(_conversationId);
+
+      if (
+        !conversation ||
+        conversation.workspaceId !== args.workspaceId ||
+        !isParticipant(conversation, member)
+      ) {
+        throw new Error("Conversation not found");
+      }
     }
 
     const messageId = await ctx.db.insert("messages", {
@@ -293,7 +344,7 @@ export const getById = query({
 
     const currentMember = await getMember(ctx, message.workspaceId, userId);
 
-    if (!currentMember) {
+    if (!(await canReadMessage(ctx, message, currentMember))) {
       return null;
     }
 

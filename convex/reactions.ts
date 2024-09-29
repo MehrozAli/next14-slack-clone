@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation } from "./_generated/server";
-import { getMember } from "./messages";
+import { canReadMessage, getMember } from "./access";
 
 export const toggle = mutation({
   args: { messageId: v.id("messages"), value: v.string() },
@@ -21,7 +21,7 @@ export const toggle = mutation({
 
     const member = await getMember(ctx, message.workspaceId, userId);
 
-    if (!member) {
+    if (!member || !(await canReadMessage(ctx, message, member))) {
       throw new Error("Unauthorized");
     }
 
