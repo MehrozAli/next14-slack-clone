@@ -84,6 +84,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
               setFormData((prev) => ({ ...prev, name: e.target.value }))
             }
             placeholder="Full Name"
+            maxLength={80}
             required
           />
 

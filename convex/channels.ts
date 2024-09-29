@@ -3,6 +3,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation, query } from "./_generated/server";
 import { deleteMessages } from "./messages";
+import { channelName } from "./limits";
 
 export const get = query({
   args: { workspaceId: v.id("workspaces") },
@@ -55,10 +56,8 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
-    const parsedName = args.name.replace(/\s+/g, "-");
-
     const channelId = await ctx.db.insert("channels", {
-      name: parsedName,
+      name: channelName(args.name),
       workspaceId: args.workspaceId,
     });
 
@@ -122,7 +121,7 @@ export const update = mutation({
       throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(args.id, { name: args.name });
+    await ctx.db.patch(args.id, { name: channelName(args.name) });
 
     return args.id;
   },

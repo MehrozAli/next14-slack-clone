@@ -52,6 +52,7 @@ export const CreateWorkspaceModal = () => {
             required
             autoFocus
             minLength={3}
+            maxLength={80}
             placeholder="Workspace name e.g. 'Work', 'Personal', 'Home'"
           />
 

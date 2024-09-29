@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation, query } from "./_generated/server";
+import { workspaceName } from "./limits";
 
 const generateCode = () => {
   const code = Array.from(
@@ -50,10 +51,11 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
+    const name = workspaceName(args.name);
     const joinCode = generateCode();
 
     const workspaceId = await ctx.db.insert("workspaces", {
-      name: args.name,
+      name,
       userId,
       joinCode,
     });
@@ -134,7 +136,7 @@ export const update = mutation({
       throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(args.id, { name: args.name });
+    await ctx.db.patch(args.id, { name: workspaceName(args.name) });
 
     return args.id;
   },

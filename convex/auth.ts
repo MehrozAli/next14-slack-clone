@@ -7,10 +7,19 @@ import { DataModel } from "./_generated/dataModel";
 
 const CustomPassword = Password<DataModel>({
   profile(params) {
-    return {
-      email: params.email as string,
-      name: params.name as string,
-    };
+    const email = params.email as string;
+
+    if (params.flow !== "signUp") {
+      return { email };
+    }
+
+    const name = String(params.name ?? "").trim();
+
+    if (name.length === 0 || name.length > 80) {
+      throw new Error("Name must be 1-80 characters");
+    }
+
+    return { email, name };
   },
 });
 

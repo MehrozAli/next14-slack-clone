@@ -3,10 +3,12 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 import { mutation } from "./_generated/server";
 import { canReadMessage, getMember } from "./access";
+import { reactionValue } from "./limits";
 
 export const toggle = mutation({
   args: { messageId: v.id("messages"), value: v.string() },
   handler: async (ctx, args) => {
+    const value = reactionValue(args.value);
     const userId = await getAuthUserId(ctx);
 
     if (!userId) {
@@ -31,7 +33,7 @@ export const toggle = mutation({
         q.and(
           q.eq(q.field("messageId"), args.messageId),
           q.eq(q.field("memberId"), member._id),
-          q.eq(q.field("value"), args.value)
+          q.eq(q.field("value"), value)
         )
       )
       .first();
@@ -42,7 +44,7 @@ export const toggle = mutation({
       return existingMessageReaction._id;
     } else {
       const newReactionId = await ctx.db.insert("reactions", {
-        value: args.value,
+        value,
         memberId: member._id,
         messageId: message._id,
         workspaceId: message.workspaceId,

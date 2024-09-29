@@ -10,7 +10,7 @@ import {
   isParticipant,
   requireUserId,
 } from "./access";
-import { imageProblem } from "./limits";
+import { imageProblem, messageBody } from "./limits";
 
 // Removes messages together with their reactions and attached images, so
 // deleting a message never leaves orphaned rows or files behind.
@@ -301,7 +301,7 @@ export const create = mutation({
 
     const messageId = await ctx.db.insert("messages", {
       memberId: member._id,
-      body: args.body,
+      body: messageBody(args.body),
       image: args.image,
       channelId: args.channelId,
       workspaceId: args.workspaceId,
@@ -334,7 +334,10 @@ export const update = mutation({
       throw new Error("Unauthorized");
     }
 
-    await ctx.db.patch(args.id, { body: args.body, updatedAt: Date.now() });
+    await ctx.db.patch(args.id, {
+      body: messageBody(args.body),
+      updatedAt: Date.now(),
+    });
 
     return args.id;
   },
