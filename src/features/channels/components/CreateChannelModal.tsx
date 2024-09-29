@@ -65,6 +65,7 @@ export const CreateChannelModal = () => {
             value={name}
             disabled={isPending}
             onChange={handleChange}
+            aria-label="Channel name"
             placeholder="e.g. plan-budget"
             minLength={3}
             maxLength={80}

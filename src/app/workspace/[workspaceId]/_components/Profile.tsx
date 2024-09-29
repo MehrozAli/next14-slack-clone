@@ -228,7 +228,7 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
               </p>
 
               <Link
-                className="text-sm hover:underline text-[#1264a3]"
+                className="text-sm hover:underline text-link"
                 href={`mailto:${member.user.email}`}
               >
                 {member.user.email}

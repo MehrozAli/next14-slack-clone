@@ -57,7 +57,7 @@ export const WorkspaceHeader = ({
 
           <DropdownMenuContent side="bottom" align="start" className="w-64">
             <DropdownMenuItem className="cursor-pointer capitalize">
-              <div className="size-9 relative overflow-hidden text-white font-semibold text-xl rounded-md flex items-center justify-center bg-[#616061] mr-2">
+              <div className="size-9 relative overflow-hidden text-white font-semibold text-xl rounded-md flex items-center justify-center bg-panel mr-2">
                 {workspace.name.charAt(0).toUpperCase()}
               </div>
 

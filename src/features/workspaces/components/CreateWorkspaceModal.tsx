@@ -4,7 +4,13 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +41,7 @@ export const CreateWorkspaceModal = () => {
 
           handleClose();
         },
+        onError: () => toast.error("Failed to create workspace"),
       }
     );
   };
@@ -42,7 +49,12 @@ export const CreateWorkspaceModal = () => {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
-        <DialogHeader>Add a workspace</DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Create a workspace</DialogTitle>
+          <DialogDescription>
+            You will be its admin and can invite others with a join code.
+          </DialogDescription>
+        </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Input
@@ -53,7 +65,8 @@ export const CreateWorkspaceModal = () => {
             autoFocus
             minLength={3}
             maxLength={80}
-            placeholder="Workspace name e.g. 'Work', 'Personal', 'Home'"
+            aria-label="Workspace name"
+            placeholder="Workspace name, e.g. Design or Book club"
           />
 
           <div className="flex justify-end">

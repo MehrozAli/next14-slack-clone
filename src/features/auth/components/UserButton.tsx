@@ -25,7 +25,7 @@ export const UserButton = () => {
   }
 
   const { name, image } = data;
-  const avatarFallback = name!.charAt(0).toUpperCase();
+  const avatarFallback = (name ?? "?").charAt(0).toUpperCase();
 
   const handleSignOut = () => {
     signOut();
@@ -33,7 +33,7 @@ export const UserButton = () => {
 
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="relative outline-none">
+      <DropdownMenuTrigger className="relative rounded-md" aria-label="Account menu">
         <Avatar className="rounded-md size-10 hover:opacity-75 transition">
           <AvatarImage className="rounded-md" alt={name} src={image} />
 

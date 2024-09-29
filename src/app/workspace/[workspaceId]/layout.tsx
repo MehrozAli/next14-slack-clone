@@ -36,7 +36,7 @@ const WorkspaceLayout = ({ children }: PropsWithChildren) => {
           <ResizablePanel
             defaultSize={20}
             minSize={11}
-            className="bg-[#5e2c5f]"
+            className="bg-panel"
           >
             <WorkspaceSidebar />
           </ResizablePanel>

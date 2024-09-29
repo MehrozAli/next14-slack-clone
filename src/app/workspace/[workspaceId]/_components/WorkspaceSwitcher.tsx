@@ -27,7 +27,7 @@ export const WorkspaceSwitcher = () => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="size-9 relative overflow-hidden bg-[#ababad] rounded-md flex items-center justify-center hover:bg-[#ababad]/80 text-slate-800 font-semibold text-xl">
+      <DropdownMenuTrigger className="size-9 relative overflow-hidden bg-signal rounded-md flex items-center justify-center hover:bg-signal/85 text-white font-display font-semibold text-xl">
         {isWorkspaceLoading ? (
           <Loader className="size-5 shrink-0 animate-spin" />
         ) : (
@@ -53,7 +53,7 @@ export const WorkspaceSwitcher = () => {
             className="cursor-pointer capitalize overflow-hidden"
             key={workspace?._id}
           >
-            <div className="size-9 relative shrink-0 overflow-hidden bg-[#616061] text-white font-semibold text-xl rounded-md flex items-center justify-center mr-2">
+            <div className="size-9 relative shrink-0 overflow-hidden bg-panel text-white font-semibold text-xl rounded-md flex items-center justify-center mr-2">
               {workspace.name.charAt(0).toUpperCase()}
             </div>
 
@@ -65,7 +65,7 @@ export const WorkspaceSwitcher = () => {
           className="cursor-pointer"
           onClick={() => setOpen(true)}
         >
-          <div className="size-9 relative overflow-hidden bg-[#f2f2f2] text-slate-800 font-semibold text-xl rounded-md flex items-center justify-center mr-2">
+          <div className="size-9 relative overflow-hidden bg-muted text-foreground font-semibold text-xl rounded-md flex items-center justify-center mr-2">
             <Plus />
           </div>
           Create a new workspace

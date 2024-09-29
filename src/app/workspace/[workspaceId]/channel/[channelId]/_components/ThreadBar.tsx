@@ -32,7 +32,7 @@ export const ThreadBar = ({
           <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
 
-        <span className="text-xs text-sky-700 hover:underline font-bold truncate ">
+        <span className="text-xs text-link hover:underline font-bold truncate ">
           {count} {count > 1 ? "replies" : "reply"}
         </span>
 

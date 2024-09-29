@@ -162,6 +162,7 @@ const Editor = ({
       <input
         type="file"
         accept={IMAGE_TYPES.join(",")}
+        aria-label="Image attachment"
         ref={imageRef}
         onChange={(event) => {
           const file = event.target.files?.[0];
@@ -196,6 +197,8 @@ const Editor = ({
             <div className="relative size-[62px] flex items-center justify-center group/image">
               <Hint label="Remove image">
                 <button
+                  type="button"
+                  aria-label="Remove image"
                   onClick={() => {
                     setImage(null);
                     imageRef.current!.value = "";
@@ -208,9 +211,9 @@ const Editor = ({
 
               <Image
                 src={URL.createObjectURL(image)}
-                alt="Uploaded"
+                alt="Image to attach"
                 fill
-                className="rounded-xl overflow-hidden border oject-cover"
+                className="rounded-xl overflow-hidden border object-cover"
               />
             </div>
           </div>
@@ -221,6 +224,7 @@ const Editor = ({
             <Button
               disabled={disabled}
               onClick={toggleToolbar}
+              aria-label={isToolbarVisible ? "Hide formatting" : "Show formatting"}
               variant="ghost"
               size="iconSm"
             >
@@ -229,7 +233,7 @@ const Editor = ({
           </Hint>
 
           <EmojiPopover onEmojiSelect={onEmojiSelect}>
-            <Button disabled={disabled} variant="ghost" size="iconSm">
+            <Button disabled={disabled} variant="ghost" size="iconSm" aria-label="Insert emoji">
               <Smile className="size-4" />
             </Button>
           </EmojiPopover>
@@ -239,6 +243,7 @@ const Editor = ({
               <Hint label="Add image">
                 <Button
                   onClick={() => imageRef.current?.click()}
+                  aria-label="Attach image"
                   disabled={disabled}
                   variant="ghost"
                   size="iconSm"
@@ -249,12 +254,13 @@ const Editor = ({
 
               <Button
                 disabled={isEmpty || disabled}
+                aria-label="Send message"
                 size="iconSm"
                 className={cn(
                   "ml-auto",
                   isEmpty
-                    ? "bg-white hover:bg-white text-muted-foreground"
-                    : "bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
+                    ? "bg-transparent hover:bg-transparent text-muted-foreground"
+                    : "bg-signal hover:bg-signal/85 text-white"
                 )}
                 onClick={() =>
                   onSubmit({
@@ -281,7 +287,7 @@ const Editor = ({
 
               <Button
                 disabled={disabled || isEmpty}
-                className="bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
+                className="bg-signal hover:bg-signal/85 text-white"
                 size="sm"
                 onClick={() =>
                   onSubmit({

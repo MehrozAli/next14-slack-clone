@@ -97,7 +97,7 @@ export const PreferencesModal = ({
                 <div className="px-5 py-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">Workspace Name</p>
-                    <p className="text-sm text-[#1264a3] hover:underline font-semibold">
+                    <p className="text-sm text-link hover:underline font-semibold">
                       Edit
                     </p>
                   </div>

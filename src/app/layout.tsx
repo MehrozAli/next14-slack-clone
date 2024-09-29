@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
@@ -8,22 +7,17 @@ import { ModalsProvider } from "@/providers/ModalsProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { JotaiProvider } from "@/providers/JotaiProvider";
 
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans/700.css";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
 export const metadata: Metadata = {
-  title: "Slack Clone",
-  description: "Slack Clone built with NextJs",
+  title: "Backchannel",
+  description:
+    "Team chat with workspaces, channels, threads and direct messages, built on Next.js and Convex.",
 };
 
 export default function RootLayout({
@@ -34,9 +28,7 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className="antialiased">
           <NuqsAdapter>
             <ConvexClientProvider>
               <JotaiProvider>

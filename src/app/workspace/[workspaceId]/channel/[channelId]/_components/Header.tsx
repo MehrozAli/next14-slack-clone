@@ -118,7 +118,7 @@ export const Header = ({ title }: HeaderProps) => {
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">Channel Name</p>
                     {currentMember?.role === "admin" ? (
-                      <p className="text-sm text-[#1264a3] hover:underline font-semibold">
+                      <p className="text-sm text-link hover:underline font-semibold">
                         Edit
                       </p>
                     ) : null}

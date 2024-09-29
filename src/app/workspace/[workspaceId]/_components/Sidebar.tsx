@@ -6,7 +6,7 @@ import { SidebarButton } from "./SidebarButton";
 
 export const Sidebar = () => {
   return (
-    <aside className="w-[70px] h-full bg-[#481349] flex flex-col gap-y-4 items-center pt-[9px] pb-[4px]">
+    <aside className="w-[70px] h-full bg-rail flex flex-col gap-y-4 items-center pt-[9px] pb-[4px]">
       <WorkspaceSwitcher />
 
       <SidebarButton icon={Home} label="Home" isActive />

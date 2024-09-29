@@ -1,4 +1,4 @@
-import { InfoIcon, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -41,7 +41,7 @@ export const Toolbar = () => {
   };
 
   return (
-    <nav className="bg-[#481349] flex items-center justify-between h-10 p-1.5">
+    <nav className="bg-rail flex items-center justify-between h-10 p-1.5">
       <div className="flex-1" />
 
       <div className="min-w-[280px] max-w-[642px] grow shrink">
@@ -50,7 +50,7 @@ export const Toolbar = () => {
           className="bg-accent/25 hover:bg-accent/25 w-full justify-start h-7 px-2"
           onClick={() => setOpen(true)}
         >
-          <Search className="size-4 text-white mr-2" />
+          <Search aria-hidden className="size-4 text-white mr-2" />
 
           <span className="text-white text-xs">Search {data?.name}</span>
         </Button>
@@ -88,11 +88,7 @@ export const Toolbar = () => {
         </CommandDialog>
       </div>
 
-      <div className="ml-auto flex-1 flex items-center justify-end">
-        <Button variant="transparent" size="iconSm">
-          <InfoIcon className="size-5 text-white" />
-        </Button>
-      </div>
+      <div className="flex-1" />
     </nav>
   );
 };

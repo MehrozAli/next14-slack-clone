@@ -11,7 +11,19 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+  			display: ['"Bricolage Grotesque Variable"', '"IBM Plex Sans"', 'system-ui', 'sans-serif']
+  		},
   		colors: {
+  			rail: 'hsl(var(--rail))',
+  			panel: {
+  				DEFAULT: 'hsl(var(--panel))',
+  				foreground: 'hsl(var(--panel-foreground) / 0.85)'
+  			},
+  			signal: 'hsl(var(--signal))',
+  			link: 'hsl(var(--link))',
+  			highlight: 'hsl(var(--highlight))',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
