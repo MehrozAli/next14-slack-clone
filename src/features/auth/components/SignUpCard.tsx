@@ -1,8 +1,10 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { TriangleAlert } from "lucide-react";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 import {
   Card,
@@ -21,11 +23,39 @@ interface SignUpCardProps {
 }
 
 export const SignUpCard = ({ setState }: SignUpCardProps) => {
+  const { signIn } = useAuthActions();
+
+  const [pending, setPending] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [error, setError] = useState("");
+
+  const handleProviderSignUp = (value: "google" | "github") => {
+    setPending(true);
+
+    signIn(value).finally(() => setPending(false));
+  };
+
+  const onPasswordSignUp = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const { email, password, confirmPassword, name } = formData;
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
+
+      return;
+    }
+
+    setPending(true);
+    signIn("password", { name, email, password, flow: "signUp" })
+      .catch((err) => setError("Something went wrong"))
+      .finally(() => setPending(false));
+  };
 
   return (
     <Card className="h-full w-full p-8">
@@ -37,10 +67,28 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         </CardDescription>
       </CardHeader>
 
+      {!!error ? (
+        <div className="bg-destructive/15 p-3 flex items-center gap-x-2 rounded-md text-sm text-destructive mb-6">
+          <TriangleAlert className="size-4" />
+
+          <p>{error}</p>
+        </div>
+      ) : null}
+
       <CardContent className="space-y-5 px-0 pb-0">
-        <form className="space-y-2.5">
+        <form onSubmit={onPasswordSignUp} className="space-y-2.5">
           <Input
-            disabled={false}
+            disabled={pending}
+            value={formData.name}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
+            placeholder="Full Name"
+            required
+          />
+
+          <Input
+            disabled={pending}
             value={formData.email}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, email: e.target.value }))
@@ -51,7 +99,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
           />
 
           <Input
-            disabled={false}
+            disabled={pending}
             value={formData.password}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, password: e.target.value }))
@@ -62,7 +110,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
           />
 
           <Input
-            disabled={false}
+            disabled={pending}
             value={formData.confirmPassword}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -75,19 +123,31 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             required
           />
 
-          <Button size="lg" type="submit" className="w-full">
+          <Button disabled={pending} size="lg" type="submit" className="w-full">
             Continue
           </Button>
         </form>
 
         <Separator />
         <div className="flex flex-col gap-y-2.5">
-          <Button className="relative w-full" size="lg" variant="outline">
+          <Button
+            onClick={() => handleProviderSignUp("google")}
+            className="relative w-full"
+            size="lg"
+            variant="outline"
+            disabled={pending}
+          >
             <FcGoogle className="size-5 absolute top-3 left-2.5" />
             Continue with Google
           </Button>
 
-          <Button className="relative w-full" size="lg" variant="outline">
+          <Button
+            onClick={() => handleProviderSignUp("github")}
+            className="relative w-full"
+            size="lg"
+            variant="outline"
+            disabled={pending}
+          >
             <FaGithub className="size-5 absolute top-3 left-2.5" />
             Continue with GitHub
           </Button>

@@ -1,5 +1,21 @@
-import { AuthScreen } from "@/features/auth/components/AuthScreen";
+"use client";
+
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  return <AuthScreen />;
+  const router = useRouter();
+
+  const { signOut } = useAuthActions();
+
+  return (
+    <div className="">
+      Logged In!
+      <Button onClick={() => signOut().finally(() => router.refresh())}>
+        Signout
+      </Button>
+    </div>
+  );
 }

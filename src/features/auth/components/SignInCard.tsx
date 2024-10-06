@@ -1,8 +1,11 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { TriangleAlert } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +24,36 @@ interface SignInCardProps {
 }
 
 export const SignInCard = ({ setState }: SignInCardProps) => {
+  const router = useRouter();
+  const { signIn } = useAuthActions();
+
+  const [pending, setPending] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+
+  const handleProviderSignin = (value: "google" | "github") => {
+    setPending(true);
+
+    signIn(value).finally(() => setPending(false));
+  };
+
+  const onPasswordSignIn = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const { email, password } = formData;
+
+    setPending(true);
+    signIn("password", { email, password, flow: "signIn" })
+      .catch((err) => setError("Invalid email or password"))
+      .finally(() => {
+        setPending(false);
+
+        router.refresh();
+      });
+  };
 
   return (
     <Card className="h-full w-full p-8">
@@ -36,10 +65,18 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
         </CardDescription>
       </CardHeader>
 
+      {!!error ? (
+        <div className="bg-destructive/15 p-3 flex items-center gap-x-2 rounded-md text-sm text-destructive mb-6">
+          <TriangleAlert className="size-4" />
+
+          <p>{error}</p>
+        </div>
+      ) : null}
+
       <CardContent className="space-y-5 px-0 pb-0">
-        <form className="space-y-2.5">
+        <form onSubmit={onPasswordSignIn} className="space-y-2.5">
           <Input
-            disabled={false}
+            disabled={pending}
             value={formData.email}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, email: e.target.value }))
@@ -50,7 +87,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
           />
 
           <Input
-            disabled={false}
+            disabled={pending}
             value={formData.password}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, password: e.target.value }))
@@ -60,19 +97,31 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             required
           />
 
-          <Button size="lg" type="submit" className="w-full">
+          <Button disabled={pending} size="lg" type="submit" className="w-full">
             Continue
           </Button>
         </form>
 
         <Separator />
         <div className="flex flex-col gap-y-2.5">
-          <Button className="relative w-full" size="lg" variant="outline">
+          <Button
+            onClick={() => handleProviderSignin("google")}
+            className="relative w-full"
+            size="lg"
+            variant="outline"
+            disabled={pending}
+          >
             <FcGoogle className="size-5 absolute top-3 left-2.5" />
             Continue with Google
           </Button>
 
-          <Button className="relative w-full" size="lg" variant="outline">
+          <Button
+            onClick={() => handleProviderSignin("github")}
+            className="relative w-full"
+            size="lg"
+            variant="outline"
+            disabled={pending}
+          >
             <FaGithub className="size-5 absolute top-3 left-2.5" />
             Continue with GitHub
           </Button>
