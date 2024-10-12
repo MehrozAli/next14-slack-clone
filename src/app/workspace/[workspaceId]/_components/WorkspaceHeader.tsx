@@ -1,4 +1,4 @@
-import { ChevronDown, SquarePen } from "lucide-react";
+import { ChevronDown, ListFilter, SquarePen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Hint } from "@/components/Hint";
+
 import { Doc } from "../../../../../convex/_generated/dataModel";
 
 interface WorkspaceHeaderProps {
@@ -68,9 +70,17 @@ export const WorkspaceHeader = ({
       </DropdownMenu>
 
       <div className="flex items-center gap-0.5">
-        <Button size="iconSm" variant="transparent">
-          <SquarePen className="size-4" />
-        </Button>
+        <Hint label="Filter" side="bottom">
+          <Button size="iconSm" variant="transparent">
+            <ListFilter className="size-4" />
+          </Button>
+        </Hint>
+
+        <Hint label="New Message" side="bottom">
+          <Button size="iconSm" variant="transparent">
+            <SquarePen className="size-4" />
+          </Button>
+        </Hint>
       </div>
     </div>
   );
