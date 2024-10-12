@@ -42,7 +42,7 @@ export const UserButton = () => {
       <DropdownMenuContent align="center" side="right" className="w-60">
         <DropdownMenuItem
           onClick={() => signOut().finally(() => router.refresh())}
-          className="h-10"
+          className="h-10 cursor-pointer"
         >
           <LogOut className="size-4 mr-2" />
           Log Out
