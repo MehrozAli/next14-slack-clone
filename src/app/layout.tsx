@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import { ModalsProvider } from "@/components/ModalsProvider";
+import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
+import { ModalsProvider } from "@/providers/ModalsProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { JotaiProvider } from "@/providers/JotaiProvider";
 
 import "./globals.css";
 
@@ -36,10 +37,12 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ConvexClientProvider>
-            <Toaster />
-            <ModalsProvider />
+            <JotaiProvider>
+              <Toaster />
+              <ModalsProvider />
 
-            {children}
+              {children}
+            </JotaiProvider>
           </ConvexClientProvider>
         </body>
       </html>
