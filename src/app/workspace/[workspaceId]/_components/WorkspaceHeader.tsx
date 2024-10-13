@@ -13,6 +13,7 @@ import { Hint } from "@/components/Hint";
 
 import { PreferencesModal } from "./PreferencesModal";
 import { Doc } from "../../../../../convex/_generated/dataModel";
+import { InviteModal } from "./InviteModal";
 
 interface WorkspaceHeaderProps {
   workspace: Doc<"workspaces">;
@@ -24,9 +25,17 @@ export const WorkspaceHeader = ({
   isAdmin,
 }: WorkspaceHeaderProps) => {
   const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   return (
     <>
+      <InviteModal
+        open={isInviteModalOpen}
+        setOpen={setIsInviteModalOpen}
+        workspaceName={workspace.name}
+        joinCode={workspace.joinCode}
+     />
+
       <PreferencesModal
         open={isPreferencesModalOpen}
         setOpen={setIsPreferencesModalOpen}
@@ -65,7 +74,7 @@ export const WorkspaceHeader = ({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer py-2"
-                  onClick={() => {}}
+                  onClick={() => setIsInviteModalOpen(true)}
                 >
                   Invite to {workspace.name}
                 </DropdownMenuItem>
