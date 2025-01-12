@@ -11,6 +11,8 @@ import { MdSend } from "react-icons/md";
 import { ImageIcon, Smile } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
+import { EmojiPopover } from "./EmojiPopover";
 import { Button } from "./ui/button";
 import { Hint } from "./Hint";
 
@@ -60,6 +62,12 @@ const Editor = ({
     if (toolbarElement) {
       toolbarElement.classList.toggle("hidden");
     }
+  };
+
+  const onEmojiSelect = (emoji: any) => {
+    const quill = quillRef.current;
+
+    quill?.insertText(quill.getSelection()?.index || 0, emoji.native);
   };
 
   useLayoutEffect(() => {
@@ -149,11 +157,11 @@ const Editor = ({
             </Button>
           </Hint>
 
-          <Hint label="Add emoji">
+          <EmojiPopover onEmojiSelect={onEmojiSelect}>
             <Button disabled={disabled} variant="ghost" size="iconSm">
               <Smile className="size-4" />
             </Button>
-          </Hint>
+          </EmojiPopover>
 
           {variant === "create" ? (
             <>
@@ -196,11 +204,18 @@ const Editor = ({
         </div>
       </div>
 
-      <div className="p-1 text-[10px] text-muted-foreground flex justify-end">
-        <p>
-          <strong>Shift + Return</strong> to add a new line
-        </p>
-      </div>
+      {variant === "create" ? (
+        <div
+          className={cn(
+            "p-1 text-[10px] text-muted-foreground flex justify-end opacity-0 transition",
+            { "opacity-100": !isEmpty }
+          )}
+        >
+          <p>
+            <strong>Shift + Return</strong> to add a new line
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 };
