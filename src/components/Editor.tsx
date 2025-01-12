@@ -55,7 +55,7 @@ const Editor = ({
   const disabledRef = useRef(disabled);
   const imageRef = useRef<HTMLInputElement>(null);
 
-  const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+  const isEmpty = !image && text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
   const toggleToolbar = () => {
     setIsToolbarVisible((prev) => !prev);
@@ -98,6 +98,17 @@ const Editor = ({
             enter: {
               key: "Enter",
               handler: () => {
+                const text = quill.getText();
+                const addedImage = imageRef.current?.files?.[0] || null;
+                const isEmpty =
+                  !addedImage &&
+                  text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+
+                if (isEmpty) return;
+
+                const body = JSON.stringify(quill.getContents());
+                submitRef.current?.({ body, image: addedImage });
+
                 return;
               },
             },
@@ -153,7 +164,14 @@ const Editor = ({
         className="hidden"
       />
 
-      <div className="flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white">
+      <div
+        className={cn(
+          "flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white",
+          {
+            "opacity-50": disabled,
+          }
+        )}
+      >
         <div className="h-full ql-custom" ref={containerRef} />
 
         {!!image ? (
@@ -221,6 +239,12 @@ const Editor = ({
                     ? "bg-white hover:bg-white text-muted-foreground"
                     : "bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
                 )}
+                onClick={() =>
+                  onSubmit({
+                    body: JSON.stringify(quillRef.current?.getContents()),
+                    image,
+                  })
+                }
               >
                 <MdSend className="size-4" />
               </Button>
@@ -229,7 +253,12 @@ const Editor = ({
 
           {variant === "update" ? (
             <div className="ml-auto flex items-center gap-x-2">
-              <Button disabled={disabled} variant="outline" size="sm">
+              <Button
+                disabled={disabled}
+                variant="outline"
+                size="sm"
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
 
@@ -237,6 +266,12 @@ const Editor = ({
                 disabled={disabled || isEmpty}
                 className="bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
                 size="sm"
+                onClick={() =>
+                  onSubmit({
+                    body: JSON.stringify(quillRef.current?.getContents()),
+                    image,
+                  })
+                }
               >
                 Save
               </Button>
