@@ -12,6 +12,7 @@ type RequestType = {
   workspaceId: Id<"workspaces">;
   channelId?: Id<"channels">;
   parentMessageId?: Id<"messages">;
+  conversationId?: Id<"conversations">;
 };
 
 interface Options {
