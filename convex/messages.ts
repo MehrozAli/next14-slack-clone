@@ -5,7 +5,7 @@ import { paginationOptsValidator } from "convex/server";
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 
-const getMember = async (
+export const getMember = async (
   ctx: QueryCtx,
   workspaceId: Id<"workspaces">,
   userId: Id<"users">
