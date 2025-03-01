@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-import { query, QueryCtx } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 const populateUser = (ctx: QueryCtx, id: Id<"users">) => {
@@ -104,5 +104,113 @@ export const getById = query({
     if (!user) return null;
 
     return { ...member, user };
+  },
+});
+
+export const update = mutation({
+  args: {
+    id: v.id("members"),
+    role: v.union(v.literal("admin"), v.literal("member")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const member = await ctx.db.get(args.id);
+
+    if (!member) {
+      throw new Error("Member not found");
+    }
+
+    const currentMember = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_user_id", (q) =>
+        q.eq("workspaceId", member.workspaceId).eq("userId", userId)
+      )
+      .unique();
+
+    if (!currentMember || currentMember.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.id, { role: args.role });
+    return args.id;
+  },
+});
+
+export const remove = mutation({
+  args: {
+    id: v.id("members"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const member = await ctx.db.get(args.id);
+
+    if (!member) {
+      throw new Error("Member not found");
+    }
+
+    const currentMember = await ctx.db
+      .query("members")
+      .withIndex("by_workspace_user_id", (q) =>
+        q.eq("workspaceId", member.workspaceId).eq("userId", userId)
+      )
+      .unique();
+
+    if (!currentMember) {
+      throw new Error("Unauthorized");
+    }
+
+    if (member.role === "admin") {
+      throw new Error("Admin can't be removed");
+    }
+
+    if (currentMember._id === args.id && currentMember.role === "admin") {
+      throw new Error("Can't remove self if an admin");
+    }
+
+    // * Delete all related messages & reactions
+    const [messages, reactions, conversations] = await Promise.all([
+      ctx.db
+        .query("messages")
+        .withIndex("by_member_id", (q) => q.eq("memberId", args.id))
+        .collect(),
+      ctx.db
+        .query("reactions")
+        .withIndex("by_member_id", (q) => q.eq("memberId", args.id))
+        .collect(),
+      ctx.db
+        .query("conversations")
+        .filter((q) =>
+          q.or(
+            q.eq(q.field("memberOneId"), member._id),
+            q.eq(q.field("memberTwoId"), member._id)
+          )
+        )
+        .collect(),
+    ]);
+
+    for (const message of messages) {
+      await ctx.db.delete(message._id);
+    }
+
+    for (const reaction of reactions) {
+      await ctx.db.delete(reaction._id);
+    }
+
+    for (const conversation of conversations) {
+      await ctx.db.delete(conversation._id);
+    }
+
+    await ctx.db.delete(args.id);
+    return args.id;
   },
 });
