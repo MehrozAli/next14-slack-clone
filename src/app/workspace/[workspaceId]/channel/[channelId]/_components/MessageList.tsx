@@ -9,6 +9,8 @@ import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 
 import { Message } from "./Message";
 import { ChannelHero } from "./ChannelHero";
+import { ConversationHero } from "./ConversationHero";
+
 import { Id } from "../../../../../../../convex/_generated/dataModel";
 
 interface MessageListProps {
@@ -119,6 +121,7 @@ export const MessageList = ({
           }
         }}
       />
+
       {isLoadingMore ? (
         <div className="text-center my-2 relative">
           <hr className="absolute top-1/2 left-0 right-0 border-t border-gray-300" />
@@ -130,6 +133,10 @@ export const MessageList = ({
 
       {variant === "channel" && channelName && channelCreationTime ? (
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
+      ) : null}
+
+      {variant === "conversation" ? (
+        <ConversationHero name={memberName} image={memberImage}  />
       ) : null}
     </div>
   );
