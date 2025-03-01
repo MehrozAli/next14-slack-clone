@@ -1,6 +1,5 @@
 import { InfoIcon, Search } from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
@@ -22,10 +21,10 @@ export const Toolbar = () => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const { data } = useGetWorkspace({ id: workspaceId });
-  const { data: channels, isLoading: areChannelsLoading } = useGetChannels({
+  const { data: channels } = useGetChannels({
     workspaceId,
   });
-  const { data: members, isLoading: areMembersLoading } = useGetMembers({
+  const { data: members } = useGetMembers({
     workspaceId,
   });
 

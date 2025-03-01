@@ -21,7 +21,7 @@ import { WorkspaceSection } from "./WorkspaceSection";
 import { UserItem } from "./UserItem";
 
 export const WorkspaceSidebar = () => {
-  const [_open, setOpen] = useCreateChannelModal();
+  const [, setOpen] = useCreateChannelModal();
   const memberId = useMemberId();
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();

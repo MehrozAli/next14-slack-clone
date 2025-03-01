@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { differenceInMinutes, format, isToday, isYesterday } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { Loader } from "lucide-react";
 
 import { GetMessagesReturnType } from "@/features/messages/api/useGetMessages";

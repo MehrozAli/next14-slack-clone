@@ -14,13 +14,12 @@ import { useWorkspaceId } from "@/hooks/useWorkspaceId";
 
 export const WorkspaceSwitcher = () => {
   const router = useRouter();
-  const [_open, setOpen] = useCreateWorkspaceModal();
+  const [, setOpen] = useCreateWorkspaceModal();
   const workspaceId = useWorkspaceId();
   const { data: workspace, isLoading: isWorkspaceLoading } = useGetWorkspace({
     id: workspaceId,
   });
-  const { data: workspaces, isLoading: areWorkspacesLoading } =
-    useGetWorkspaces();
+  const { data: workspaces } = useGetWorkspaces();
 
   const filteredWorkspaces = workspaces?.filter(
     (ws) => ws?._id !== workspaceId
