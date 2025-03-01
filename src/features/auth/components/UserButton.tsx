@@ -2,7 +2,6 @@
 
 import { Loader, LogOut } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -14,7 +13,6 @@ import {
 import { useCurrentUser } from "../api/useCurrentUser";
 
 export const UserButton = () => {
-  const router = useRouter();
   const { data, isLoading } = useCurrentUser();
   const { signOut } = useAuthActions();
 
@@ -30,7 +28,7 @@ export const UserButton = () => {
   const avatarFallback = name!.charAt(0).toUpperCase();
 
   const handleSignOut = () => {
-    signOut().finally(() => router.replace("/"));
+    signOut();
   };
 
   return (
