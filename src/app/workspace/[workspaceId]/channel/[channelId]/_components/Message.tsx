@@ -14,6 +14,7 @@ import { useToggleReaction } from "@/features/reactions/api/useToggleReaction";
 
 import { Thumbnail } from "./Thumbnail";
 import { Reactions } from "./Reactions";
+import { ThreadBar } from "./ThreadBar";
 
 import { Doc, Id } from "../../../../../../../convex/_generated/dataModel";
 
@@ -42,6 +43,7 @@ interface MessageProps {
   hideThreadButton?: boolean;
   threadCount?: number;
   threadImage?: string;
+  threadName?: string;
   threadTimestamp?: number;
 }
 
@@ -67,8 +69,9 @@ export const Message = (props: MessageProps) => {
     threadCount,
     threadImage,
     threadTimestamp,
+    threadName,
   } = props;
-  const {onMessageOpen, onMessageClose, parentMessageId} = usePanel();
+  const { onMessageOpen, onMessageClose, parentMessageId } = usePanel();
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure you want to delete this message? This cannot be undone.",
     "Delete message"
@@ -171,6 +174,13 @@ export const Message = (props: MessageProps) => {
                   </span>
                 ) : null}
                 <Reactions data={reactions} onChange={handleReaction} />
+                <ThreadBar
+                  count={threadCount}
+                  image={threadImage}
+                  timestamp={threadTimestamp}
+                  name={threadName}
+                  onClick={() => onMessageOpen(id)}
+                />
               </div>
             )}
           </div>
@@ -250,6 +260,13 @@ export const Message = (props: MessageProps) => {
                 <span className="text-xs text-muted-foreground">(edited)</span>
               ) : null}
               <Reactions data={reactions} onChange={handleReaction} />
+              <ThreadBar
+                count={threadCount}
+                image={threadImage}
+                timestamp={threadTimestamp}
+                onClick={() => onMessageOpen(id)}
+                name={threadName}
+              />
             </div>
           )}
         </div>
